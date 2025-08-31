@@ -27,3 +27,5 @@
 *.db  binary
 *.sqlite* binary
 '@ | Out-File -Encoding UTF8 .gitattributes
+
+.venv/
