@@ -1,0 +1,29 @@
+﻿name: CI
+on:
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
+
+jobs:
+  lint-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        python-version: ["3.11"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: ${{ matrix.python-version }} }
+      - name: Install deps
+        run: |
+          python -m pip install -U pip
+          pip install ruff black
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+      - name: Ruff
+        run: ruff check .
+      - name: Black (check)
+        run: black --check .
+      - name: Pytest (if present)
+        run: |
+          if [ -d tests ]; then pip install pytest && pytest -q; else echo "no tests"; fi

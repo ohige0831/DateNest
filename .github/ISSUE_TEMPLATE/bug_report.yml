@@ -1,0 +1,11 @@
+name: Bug report
+description: 不具合の報告
+labels: ["bug"]
+body:
+  - type: textarea
+    attributes: { label: 事象, description: 何が起きたか？再現手順も }
+    validations: { required: true }
+  - type: input
+    attributes: { label: 期待する動作 }
+  - type: textarea
+    attributes: { label: ログ/スクショ }

@@ -1,0 +1,21 @@
+* text=auto eol=lf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+*.sh  text eol=lf
+*.py  text eol=lf
+*.md  text eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.mp4 binary
+*.mov binary
+*.pdf binary
+*.exe binary
+*.dll binary
+*.pyd binary
+*.so  binary
+*.db  binary
+*.sqlite* binary
