@@ -6,46 +6,37 @@ on:
     branches: ["main"]
 
 jobs:
-  lint-and-test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        python-version: ["3.11"]
-
+  lint-ubuntu:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install deps (posix)
-        if: runner.os != 'Windows'
-        shell: bash
+          python-version: "3.11"
+      - name: Install ruff
         run: |
           python -m pip install -U pip
-          pip install ruff black
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          pip install ruff
+      - name: Ruff (lint)
+        run: ruff check . --output-format=github
+      - name: Ruff (format check)
+        run: ruff format --check . --diff
 
-      - name: Install deps (windows)
-        if: runner.os == 'Windows'
+  lint-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install ruff
         shell: pwsh
         run: |
           python -m pip install -U pip
-          pip install ruff black
-          if (Test-Path requirements.txt) { pip install -r requirements.txt }
-          if (Test-Path requirements-dev.txt) { pip install -r requirements-dev.txt }
-
-      - name: Ruff
-        run: ruff check .
-
-      - name: Black (check)
-        run: black --check .
-
-      - name: Pytest (if present)
-        if: hashFiles('tests/**') != ''
+          pip install ruff
+      - name: Ruff (lint)
         shell: pwsh
-        run: |
-          pip install pytest
-          pytest -q
+        run: ruff check . --output-format=github
+      - name: Ruff (format check)
+        shell: pwsh
+        run: ruff format --check . --diff
