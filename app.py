@@ -50,6 +50,31 @@ from PySide6.QtWidgets import (
     QListWidget as TagList,
 )
 
+
+def runtime_root() -> Path:
+    # PyInstaller exe のあるフォルダ（開発時はカレント）
+    return Path(sys.executable).parent if getattr(sys, "frozen", False) else Path.cwd()
+
+
+def ensure_runtime_db() -> bool:
+    """起動前に必ず実行。成功なら True。失敗時のみ False を返す。"""
+    root = runtime_root()
+    db_path = root / "data" / "library" / "db.sqlite3"
+    if db_path.exists():
+        return True
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    # exe に同梱した scripts.init_db を __main__ として実行
+    cwd = os.getcwd()
+    try:
+        os.chdir(root)  # scripts.init_db の既定出力(data/library)を合わせる
+        runpy.run_module("scripts.init_db", run_name="__main__")
+    except Exception:
+        return False
+    finally:
+        os.chdir(cwd)
+    return db_path.exists()
+
+
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff"}
 DB_PATH = "data/library/db.sqlite3"
 LIB_ROOT = "data/library"
@@ -67,25 +92,6 @@ CATEGORY_COLORS: dict[str, QColor] = {
 }
 
 QUALITY_LABELS = [("good", "良"), ("review", "保留"), ("bad", "悪")]
-
-
-def runtime_root() -> Path:
-    return Path(sys.executable).parent if getattr(sys, "frozen", False) else Path.cwd()
-
-
-def ensure_runtime_db():
-    root = runtime_root()
-    db_path = root / "data" / "library" / "db.sqlite3"
-    if db_path.exists():
-        return
-    db_path.parent.mkdir(parents=True, exist_ok=True)
-    # exe 内に同梱した scripts.init_db を実行
-    cwd = os.getcwd()
-    try:
-        os.chdir(root)
-        runpy.run_module("scripts.init_db", run_name="__main__")
-    finally:
-        os.chdir(cwd)
 
 
 # アプリ起動前に呼ぶ
@@ -1098,14 +1104,19 @@ if __name__ == "__main__":
         sys.exit(1)
 
     sys.excepthook = excepthook
-    Path(LIB_ROOT).mkdir(parents=True, exist_ok=True)
-    if not Path(DB_PATH).exists():
+
+    # ★ DBを自動生成（失敗時のみメッセージを出して終了）
+    if not ensure_runtime_db():
         QMessageBox.critical(
             None,
             "DateNest",
-            f"DB が見つかりません: {DB_PATH}先に scripts/init_db.py を実行してください。",
+            "DB 初期化に失敗しました。実行フォルダへの書き込み権限を確認してください。",
         )
         sys.exit(1)
+
+    # 必要なら資材フォルダを用意
+    Path(LIB_ROOT).mkdir(parents=True, exist_ok=True)
+
     w = MainWindow(root=LIB_ROOT, db_path=DB_PATH)
     w.show()
     sys.exit(app.exec())
