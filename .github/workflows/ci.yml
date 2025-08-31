@@ -14,19 +14,38 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Debug env
+      - name: Install ruff
         run: |
-          which python || true
-          python -V
-          pip --version
-          pip install -U pip
+          python -m pip install -U pip
           pip install ruff
-          python -c "import sys; print('ruff import ok'); import ruff; print('ruff', ruff.__version__)"
 
-      - name: Ruff (lint)
-        run: python -m ruff check . --output-format=github
-      - name: Ruff (format check)
-        run: python -m ruff format --check . --diff
+      - id: ruff_lint
+        name: Ruff (lint)
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python -m ruff check . --output-format=github | tee ruff_lint_ubuntu.log
+
+      - id: ruff_fmt
+        name: Ruff (format check)
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python -m ruff format --check . --diff | tee ruff_fmt_ubuntu.log
+
+      - name: Upload ruff logs (ubuntu)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruff-logs-ubuntu
+          path: |
+            ruff_lint_ubuntu.log
+            ruff_fmt_ubuntu.log
+          if-no-files-found: ignore
+
+      - name: Fail if ruff failed (ubuntu)
+        if: steps.ruff_lint.outcome == 'failure' || steps.ruff_fmt.outcome == 'failure'
+        run: exit 1
 
   lint-windows:
     runs-on: windows-latest
@@ -36,24 +55,36 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Debug env
+      - name: Install ruff
         shell: pwsh
         run: |
-          Get-Command python
-          python -V
-          pip --version
           python -m pip install -U pip
           pip install ruff
-          python - << 'PY'
-            import sys
-            print("ruff import ok")
-            import ruff
-            print("ruff", ruff.__version__)
-            PY
 
-                  - name: Ruff (lint)
-                    shell: pwsh
-                    run: python -m ruff check . --output-format=github
-                  - name: Ruff (format check)
-                    shell: pwsh
-                    run: python -m ruff format --check . --diff
+      - id: ruff_lint_win
+        name: Ruff (lint)
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          python -m ruff check . --output-format=github *>&1 | Tee-Object -FilePath ruff_lint_windows.log
+
+      - id: ruff_fmt_win
+        name: Ruff (format check)
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          python -m ruff format --check . --diff *>&1 | Tee-Object -FilePath ruff_fmt_windows.log
+
+      - name: Upload ruff logs (windows)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruff-logs-windows
+          path: |
+            ruff_lint_windows.log
+            ruff_fmt_windows.log
+          if-no-files-found: ignore
+
+      - name: Fail if ruff failed (windows)
+        if: steps.ruff_lint_win.outcome == 'failure' || steps.ruff_fmt_win.outcome == 'failure'
+        run: exit 1
