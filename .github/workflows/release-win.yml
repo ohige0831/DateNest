@@ -13,7 +13,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      # 必須依存をインストール
+      # 蠢・井ｾ晏ｭ倥ｒ繧､繝ｳ繧ｹ繝医・繝ｫ
       - name: Install deps
         shell: pwsh
         run: |
@@ -30,8 +30,7 @@ jobs:
           print("PySide6:", PySide6.__version__)
           PY
 
-      # ビルド（Qtの不要モジュールは除外してスリム化）
-      - name: Build exe (bundle Qt + resources)
+      # 繝薙Ν繝会ｼ・t縺ｮ荳崎ｦ√Δ繧ｸ繝･繝ｼ繝ｫ縺ｯ髯､螟悶＠縺ｦ繧ｹ繝ｪ繝蛹厄ｼ・      - name: Build exe (bundle Qt + resources)
         shell: pwsh
         run: |
           $opts = @(
