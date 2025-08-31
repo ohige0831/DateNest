@@ -21,14 +21,13 @@ jobs:
             "-F","app.py",
             "-n","DateNest",
             "--noconsole",
-            # 未使用の重いモジュールを除外
-            "--exclude-module","PySide6.QtWebEngineCore",
+            # 譛ｪ菴ｿ逕ｨ縺ｮ驥阪＞繝｢繧ｸ繝･繝ｼ繝ｫ繧帝勁螟・            "--exclude-module","PySide6.QtWebEngineCore",
             "--exclude-module","PySide6.QtWebEngineWidgets",
             "--exclude-module","PySide6.QtWebChannel",
             "--exclude-module","PySide6.QtQml",
             "--exclude-module","PySide6.QtQuick"
           )
-          # リソースが必要ならだけ同梱
+          # 繝ｪ繧ｽ繝ｼ繧ｹ縺悟ｿ・ｦ√↑繧峨□縺大酔譴ｱ
           if (Test-Path ui)   { $opts += @("--add-data","ui;ui") }
           if (Test-Path data) { $opts += @("--add-data","data;data") }
           pyinstaller @opts
