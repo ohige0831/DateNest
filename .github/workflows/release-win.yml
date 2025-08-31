@@ -21,13 +21,13 @@ jobs:
             "-F","app.py",
             "-n","DateNest",
             "--noconsole",
-            # 譛ｪ菴ｿ逕ｨ縺ｮ驥阪＞繝｢繧ｸ繝･繝ｼ繝ｫ繧帝勁螟・            "--exclude-module","PySide6.QtWebEngineCore",
+            # 隴幢ｽｪ闖ｴ・ｿ騾包ｽｨ邵ｺ・ｮ鬩･髦ｪ・樒ｹ晢ｽ｢郢ｧ・ｸ郢晢ｽ･郢晢ｽｼ郢晢ｽｫ郢ｧ蟶晏求陞溘・            "--exclude-module","PySide6.QtWebEngineCore",
             "--exclude-module","PySide6.QtWebEngineWidgets",
             "--exclude-module","PySide6.QtWebChannel",
             "--exclude-module","PySide6.QtQml",
             "--exclude-module","PySide6.QtQuick"
           )
-          # 繝ｪ繧ｽ繝ｼ繧ｹ縺悟ｿ・ｦ√↑繧峨□縺大酔譴ｱ
+          # 郢晢ｽｪ郢ｧ・ｽ郢晢ｽｼ郢ｧ・ｹ邵ｺ謔滂ｽｿ繝ｻ・ｦ竏壺・郢ｧ蟲ｨ笆｡邵ｺ螟ｧ驟碑ｭｴ・ｱ
           if (Test-Path ui)   { $opts += @("--add-data","ui;ui") }
           if (Test-Path data) { $opts += @("--add-data","data;data") }
           pyinstaller @opts
