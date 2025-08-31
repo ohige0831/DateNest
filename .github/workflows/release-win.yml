@@ -13,8 +13,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      # 蠢・井ｾ晏ｭ倥ｒ繧､繝ｳ繧ｹ繝医・繝ｫ
-      - name: Install deps
+      # 萓晏ｭ倥・繧､繝ｳ繧ｹ繝医・繝ｫ・・yInstaller 繧堤｢ｺ螳溘↓蜈･繧後ｋ・・      - name: Install deps
         shell: pwsh
         run: |
           python -m pip install -U pip
@@ -23,14 +22,14 @@ jobs:
           else { python -m pip install PySide6 }
           python -m pip install -U pyinstaller pyinstaller-hooks-contrib
           python - << 'PY'
-          import sys
-          import PyInstaller, PySide6
-          print("Python:", sys.version)
-          print("PyInstaller:", PyInstaller.__version__)
-          print("PySide6:", PySide6.__version__)
-          PY
+import sys
+import PyInstaller, PySide6
+print("Python:", sys.version)
+print("PyInstaller:", PyInstaller.__version__)
+print("PySide6:", PySide6.__version__)
+PY
 
-      # 繝薙Ν繝会ｼ・t縺ｮ荳崎ｦ√Δ繧ｸ繝･繝ｼ繝ｫ縺ｯ髯､螟悶＠縺ｦ繧ｹ繝ｪ繝蛹厄ｼ・      - name: Build exe (bundle Qt + resources)
+      # 繝薙Ν繝会ｼ・t 縺ｮ驥阪＞繝｢繧ｸ繝･繝ｼ繝ｫ縺ｯ髯､螟悶＠縺ｦ繧ｹ繝ｪ繝蛹厄ｼ・      - name: Build exe (bundle Qt + resources)
         shell: pwsh
         run: |
           $opts = @(
@@ -52,7 +51,6 @@ jobs:
           )
           if (Test-Path ui)   { $opts += @("--add-data","ui;ui") }
           if (Test-Path data) { $opts += @("--add-data","data;data") }
-
           python -m PyInstaller @opts
 
       - name: Upload artifact
@@ -60,3 +58,4 @@ jobs:
         with:
           name: DateNest-win
           path: dist/DateNest.exe
+          if-no-files-found: error
