@@ -13,7 +13,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      # 萓晏ｭ倥・繧､繝ｳ繧ｹ繝医・繝ｫ・・yInstaller 繧堤｢ｺ螳溘↓蜈･繧後ｋ・・      - name: Install deps
+      - name: Install deps
         shell: pwsh
         run: |
           python -m pip install -U pip
@@ -21,15 +21,9 @@ jobs:
           elseif (Test-Path pyproject.toml) { python -m pip install . }
           else { python -m pip install PySide6 }
           python -m pip install -U pyinstaller pyinstaller-hooks-contrib
-          python - << 'PY'
-import sys
-import PyInstaller, PySide6
-print("Python:", sys.version)
-print("PyInstaller:", PyInstaller.__version__)
-print("PySide6:", PySide6.__version__)
-PY
+          python -c "import sys, PyInstaller, PySide6; print('Python:', sys.version); print('PyInstaller:', PyInstaller.__version__); print('PySide6:', PySide6.__version__)"
 
-      # 繝薙Ν繝会ｼ・t 縺ｮ驥阪＞繝｢繧ｸ繝･繝ｼ繝ｫ縺ｯ髯､螟悶＠縺ｦ繧ｹ繝ｪ繝蛹厄ｼ・      - name: Build exe (bundle Qt + resources)
+      - name: Build exe (bundle Qt + resources)
         shell: pwsh
         run: |
           $opts = @(
