@@ -13,25 +13,22 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install deps
-        shell: pwsh
-        run: |
-          python -m pip install -U pip
-          if (Test-Path requirements.txt) { pip install -r requirements.txt }
-          elseif (Test-Path pyproject.toml) { pip install . }
-          else { pip install PySide6 }
-          pip install -U pyinstaller pyinstaller-hooks-contrib
-
       - name: Build exe (bundle Qt + resources)
         shell: pwsh
         run: |
-          $opts = @("--noconfirm","-F","app.py","-n","DateNest","--collect-all","PySide6")
+          $opts = @(
+            "--noconfirm",
+            "-F","app.py",
+            "-n","DateNest",
+            "--noconsole",
+            # 未使用の重いモジュールを除外
+            "--exclude-module","PySide6.QtWebEngineCore",
+            "--exclude-module","PySide6.QtWebEngineWidgets",
+            "--exclude-module","PySide6.QtWebChannel",
+            "--exclude-module","PySide6.QtQml",
+            "--exclude-module","PySide6.QtQuick"
+          )
+          # リソースが必要ならだけ同梱
           if (Test-Path ui)   { $opts += @("--add-data","ui;ui") }
           if (Test-Path data) { $opts += @("--add-data","data;data") }
           pyinstaller @opts
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: DateNest-win
-          path: dist/DateNest.exe
