@@ -56,29 +56,31 @@ def runtime_root() -> Path:
     return Path(sys.executable).parent if getattr(sys, "frozen", False) else Path.cwd()
 
 
+ROOT = runtime_root()
+LIB_ROOT = ROOT / "data" / "library"
+DB_PATH = LIB_ROOT / "db.sqlite3"
+
+
 def ensure_runtime_db() -> bool:
-    """起動前に必ず実行。成功なら True。失敗時のみ False を返す。"""
-    root = runtime_root()
-    db_path = root / "data" / "library" / "db.sqlite3"
-    if db_path.exists():
+    """起動前にDBを必ず用意する。成功なら True。"""
+    if DB_PATH.exists():
         return True
-    db_path.parent.mkdir(parents=True, exist_ok=True)
-    # exe に同梱した scripts.init_db を __main__ として実行
+
+    LIB_ROOT.mkdir(parents=True, exist_ok=True)
     cwd = os.getcwd()
     try:
-        os.chdir(root)  # scripts.init_db の既定出力(data/library)を合わせる
+        os.chdir(ROOT)  # scripts.init_db の既定出力(data/library)に合わせる
         runpy.run_module("scripts.init_db", run_name="__main__")
     except Exception:
         return False
     finally:
         os.chdir(cwd)
-    return db_path.exists()
+
+    return DB_PATH.exists()
 
 
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff"}
-DB_PATH = "data/library/db.sqlite3"
-LIB_ROOT = "data/library"
-THUMB_ROOT = Path(LIB_ROOT) / ".thumbnails" / "256"
+THUMB_ROOT = LIB_ROOT / ".thumbnails" / "256"
 
 # ---- カテゴリと色対応
 CATEGORY_COLORS: dict[str, QColor] = {
@@ -92,10 +94,6 @@ CATEGORY_COLORS: dict[str, QColor] = {
 }
 
 QUALITY_LABELS = [("good", "良"), ("review", "保留"), ("bad", "悪")]
-
-
-# アプリ起動前に呼ぶ
-ensure_runtime_db()
 
 
 def color_dot_icon(color: QColor, size: int = 14) -> QIcon:
@@ -1097,6 +1095,14 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
 
+    if not ensure_runtime_db():
+        QMessageBox.critical(
+            None,
+            "DateNest",
+            "DB 初期化に失敗しました。実行フォルダへの書き込み権限を確認してください。",
+        )
+        sys.exit(1)
+
     def excepthook(exctype, value, tb):
         msg = "".join(traceback.format_exception(exctype, value, tb))
         print(msg)
@@ -1106,13 +1112,13 @@ if __name__ == "__main__":
     sys.excepthook = excepthook
 
     # ★ DBを自動生成（失敗時のみメッセージを出して終了）
-    if not ensure_runtime_db():
-        QMessageBox.critical(
-            None,
-            "DateNest",
-            "DB 初期化に失敗しました。実行フォルダへの書き込み権限を確認してください。",
-        )
-        sys.exit(1)
+    # if not ensure_runtime_db():
+    #     QMessageBox.critical(
+    #         None,
+    #         "DateNest",
+    #         "DB 初期化に失敗しました。実行フォルダへの書き込み権限を確認してください。",
+    #     )
+    #     sys.exit(1)
 
     # 必要なら資材フォルダを用意
     Path(LIB_ROOT).mkdir(parents=True, exist_ok=True)
