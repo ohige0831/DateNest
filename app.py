@@ -3,6 +3,7 @@ import datetime
 import hashlib
 import json
 import os
+import runpy
 import shutil
 import sqlite3
 import sys
@@ -66,6 +67,29 @@ CATEGORY_COLORS: dict[str, QColor] = {
 }
 
 QUALITY_LABELS = [("good", "良"), ("review", "保留"), ("bad", "悪")]
+
+
+def runtime_root() -> Path:
+    return Path(sys.executable).parent if getattr(sys, "frozen", False) else Path.cwd()
+
+
+def ensure_runtime_db():
+    root = runtime_root()
+    db_path = root / "data" / "library" / "db.sqlite3"
+    if db_path.exists():
+        return
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    # exe 内に同梱した scripts.init_db を実行
+    cwd = os.getcwd()
+    try:
+        os.chdir(root)
+        runpy.run_module("scripts.init_db", run_name="__main__")
+    finally:
+        os.chdir(cwd)
+
+
+# アプリ起動前に呼ぶ
+ensure_runtime_db()
 
 
 def color_dot_icon(color: QColor, size: int = 14) -> QIcon:

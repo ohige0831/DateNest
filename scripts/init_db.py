@@ -1,5 +1,22 @@
+# scripts/init_db.py
 import sqlite3
 import sys
+from pathlib import Path
+
+SCHEMA_SQL = """<いまの CREATE TABLE たち>"""
+
+
+def create_db(path="data/library/db.sqlite3"):
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    con = sqlite3.connect(path)
+    con.executescript(SCHEMA_SQL)
+    con.commit()
+    con.close()
+
+
+if __name__ == "__main__":
+    create_db()
+
 
 DDL = r"""
 PRAGMA foreign_keys=ON;

@@ -43,13 +43,31 @@ jobs:
             "--exclude-module","PySide6.QtNetworkAuth",
             "--exclude-module","PySide6.QtPositioning"
           )
+          $opts += @("--hidden-import","scripts.init_db")
           if (Test-Path ui)   { $opts += @("--add-data","ui;ui") }
-          if (Test-Path data) { $opts += @("--add-data","data;data") }
           python -m PyInstaller @opts
+
+      - name: Prepare runtime DB
+        shell: pwsh
+        run: |
+          mkdir -Force data\library
+          python scripts\init_db.py
+          mkdir -Force dist\data\library
+          Copy-Item data\library\db.sqlite3 dist\data\library\db.sqlite3 -Force
+
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: DateNest-win
-          path: dist/DateNest.exe
-          if-no-files-found: error
+          path: |
+            dist/DateNest.exe
+            dist/data
+
+      - name: Prepare runtime DB
+        shell: pwsh
+        run: |
+          mkdir -Force data\library
+          python scripts\init_db.py
+          mkdir -Force dist\data\library
+          Copy-Item data\library\db.sqlite3 dist\data\library\db.sqlite3 -Force
