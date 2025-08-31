@@ -1,31 +1,33 @@
+# 既存を削除して作り直し
+Remove-Item .gitignore -ErrorAction SilentlyContinue
 @'
-# 既定はテキストを LF で
-* text=auto eol=lf
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
 
-# OS依存のものがあれば（必要に応じて）
-*.bat text eol=crlf
-*.ps1 text eol=crlf
-*.sh  text eol=lf
-
-# 明示しておくと安心
-*.py  text eol=lf
-*.md  text eol=lf
-
-# バイナリ類
-*.png binary
-*.jpg binary
-*.jpeg binary
-*.gif binary
-*.ico binary
-*.mp4 binary
-*.mov binary
-*.pdf binary
-*.exe binary
-*.dll binary
-*.pyd binary
-*.so  binary
-*.db  binary
-*.sqlite* binary
-'@ | Out-File -Encoding UTF8 .gitattributes
-
+# virtual env
 .venv/
+env/
+venv/
+
+# build / dist
+dist/
+build/
+*.egg-info/
+
+# logs & caches
+*.log
+*.db
+*.sqlite*
+
+# editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+'@ | Out-File -Encoding ascii .gitignore
+
+git add .gitignore
+git commit -m "fix: correct .gitignore (ignore venv & artifacts)"
