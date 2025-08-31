@@ -855,7 +855,7 @@ class MainWindow(QMainWindow):
         header = rows[0]
         data = rows[1:] if all((h or "").strip() for h in header) else rows
         if data is rows:
-            header = [f"col{i+1}" for i in range(len(rows[0]))]
+            header = [f"col{i + 1}" for i in range(len(rows[0]))]
         self.csv_table.clear()
         self.csv_table.setColumnCount(len(header))
         self.csv_table.setHorizontalHeaderLabels(header)
@@ -1017,7 +1017,7 @@ class MainWindow(QMainWindow):
                 if r:
                     img_id = r["id"]
                 else:
-                    member = f"images/{sha}{_safe_ext(im.get('rel_path',''))}"
+                    member = f"images/{sha}{_safe_ext(im.get('rel_path', ''))}"
                     if member in z.namelist():
                         dst_dir = _ingest_target_dir(self.root, "imported")
                         dst = dst_dir / Path(member).name
