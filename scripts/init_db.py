@@ -1,4 +1,5 @@
-import sqlite3, sys
+import sqlite3
+import sys
 
 DDL = r"""
 PRAGMA foreign_keys=ON;
@@ -98,9 +99,9 @@ END;
 """
 
 if __name__ == "__main__":
-  db = sys.argv[1] if len(sys.argv) > 1 else "data/library/db.sqlite3"
-  con = sqlite3.connect(db)
-  con.executescript(DDL)
-  con.commit()
-  con.close()
-  print(f"Initialized {db}")
+    db = sys.argv[1] if len(sys.argv) > 1 else "data/library/db.sqlite3"
+    con = sqlite3.connect(db)
+    con.executescript(DDL)
+    con.commit()
+    con.close()
+    print(f"Initialized {db}")

@@ -1,0 +1,25 @@
+﻿name: Release (Windows)
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch: {}   #  これが「Run workflow」ボタンの鍵
+
+jobs:
+  build-win:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Install deps
+        run: |
+          python -m pip install -U pip
+          if (Test-Path pyproject.toml) { pip install . } elseif (Test-Path requirements.txt) { pip install -r requirements.txt }
+          pip install pyinstaller
+      - name: Build exe
+        run: pyinstaller -F app.py -n DateNest
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DateNest-win
+          path: dist/DateNest.exe
