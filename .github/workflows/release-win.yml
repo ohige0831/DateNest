@@ -13,6 +13,24 @@ jobs:
         with:
           python-version: "3.11"
 
+      # 必須依存をインストール
+      - name: Install deps
+        shell: pwsh
+        run: |
+          python -m pip install -U pip
+          if (Test-Path requirements.txt) { python -m pip install -r requirements.txt }
+          elseif (Test-Path pyproject.toml) { python -m pip install . }
+          else { python -m pip install PySide6 }
+          python -m pip install -U pyinstaller pyinstaller-hooks-contrib
+          python - << 'PY'
+          import sys
+          import PyInstaller, PySide6
+          print("Python:", sys.version)
+          print("PyInstaller:", PyInstaller.__version__)
+          print("PySide6:", PySide6.__version__)
+          PY
+
+      # ビルド（Qtの不要モジュールは除外してスリム化）
       - name: Build exe (bundle Qt + resources)
         shell: pwsh
         run: |
@@ -21,13 +39,25 @@ jobs:
             "-F","app.py",
             "-n","DateNest",
             "--noconsole",
-            # 隴幢ｽｪ闖ｴ・ｿ騾包ｽｨ邵ｺ・ｮ鬩･髦ｪ・樒ｹ晢ｽ｢郢ｧ・ｸ郢晢ｽ･郢晢ｽｼ郢晢ｽｫ郢ｧ蟶晏求陞溘・            "--exclude-module","PySide6.QtWebEngineCore",
+            "--exclude-module","PySide6.QtWebEngineCore",
             "--exclude-module","PySide6.QtWebEngineWidgets",
+            "--exclude-module","PySide6.QtWebEngineQuick",
             "--exclude-module","PySide6.QtWebChannel",
             "--exclude-module","PySide6.QtQml",
-            "--exclude-module","PySide6.QtQuick"
+            "--exclude-module","PySide6.QtQuick",
+            "--exclude-module","PySide6.QtQuickControls2",
+            "--exclude-module","PySide6.QtCharts",
+            "--exclude-module","PySide6.QtPdf",
+            "--exclude-module","PySide6.QtNetworkAuth",
+            "--exclude-module","PySide6.QtPositioning"
           )
-          # 郢晢ｽｪ郢ｧ・ｽ郢晢ｽｼ郢ｧ・ｹ邵ｺ謔滂ｽｿ繝ｻ・ｦ竏壺・郢ｧ蟲ｨ笆｡邵ｺ螟ｧ驟碑ｭｴ・ｱ
           if (Test-Path ui)   { $opts += @("--add-data","ui;ui") }
           if (Test-Path data) { $opts += @("--add-data","data;data") }
-          pyinstaller @opts
+
+          python -m PyInstaller @opts
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DateNest-win
+          path: dist/DateNest.exe
