@@ -13,14 +13,20 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install ruff
+
+      - name: Debug env
         run: |
-          python -m pip install -U pip
+          which python || true
+          python -V
+          pip --version
+          pip install -U pip
           pip install ruff
+          python -c "import sys; print('ruff import ok'); import ruff; print('ruff', ruff.__version__)"
+
       - name: Ruff (lint)
-        run: ruff check . --output-format=github
+        run: python -m ruff check . --output-format=github
       - name: Ruff (format check)
-        run: ruff format --check . --diff
+        run: python -m ruff format --check . --diff
 
   lint-windows:
     runs-on: windows-latest
@@ -29,14 +35,25 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install ruff
+
+      - name: Debug env
         shell: pwsh
         run: |
+          Get-Command python
+          python -V
+          pip --version
           python -m pip install -U pip
           pip install ruff
-      - name: Ruff (lint)
-        shell: pwsh
-        run: ruff check . --output-format=github
-      - name: Ruff (format check)
-        shell: pwsh
-        run: ruff format --check . --diff
+          python - << 'PY'
+            import sys
+            print("ruff import ok")
+            import ruff
+            print("ruff", ruff.__version__)
+            PY
+
+                  - name: Ruff (lint)
+                    shell: pwsh
+                    run: python -m ruff check . --output-format=github
+                  - name: Ruff (format check)
+                    shell: pwsh
+                    run: python -m ruff format --check . --diff
